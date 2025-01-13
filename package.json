@@ -28,5 +28,8 @@
 		"typescript": "^5.0.0",
 		"typescript-eslint": "^8.0.0",
 		"vite": "^5.4.11"
+	},
+	"dependencies": {
+		"dexie": "^4.0.10"
 	}
 }
