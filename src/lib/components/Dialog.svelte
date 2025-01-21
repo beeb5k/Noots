@@ -1,10 +1,5 @@
-<!--
-@component
-Dialog component is a reusable component that can be used to display a dialog box with a heading, message, and buttons. 
-It can be used to display a confirmation dialog, alert dialog, or any other type of dialog box.
--->
-
 <script lang="ts">
+	import { scale } from 'svelte/transition';
 	import type { Snippet } from 'svelte';
 
 	interface DialogProps {
@@ -15,7 +10,7 @@ It can be used to display a confirmation dialog, alert dialog, or any other type
 		/**A boolean value that determines whether the dialog is open or closed.*/
 		isDialogOpen: boolean;
 		/**The content of the dialog.*/
-		children?: Snippet;
+		children: Snippet;
 	}
 
 	let { heading, message, children, isDialogOpen = $bindable() }: DialogProps = $props();
@@ -24,28 +19,34 @@ It can be used to display a confirmation dialog, alert dialog, or any other type
 		if (typeof document !== 'undefined') {
 			const dialog = document.querySelector('dialog');
 			if (dialog) document.body.style.overflow = isDialogOpen ? 'hidden' : 'auto';
+
+			// close dialog on Escape key press
+			const closeDialog = (e: KeyboardEvent) => {
+				if (e.key === 'Escape') isDialogOpen = false;
+			};
+			window.addEventListener('keydown', closeDialog);
+			return () => window.removeEventListener('keydown', closeDialog);
 		}
 	});
 </script>
 
-<div class={isDialogOpen ? 'backdrop' : 'hidden'}>
-	<dialog open={isDialogOpen}>
-		<div class="info">
-			<h3>{heading}</h3>
-			<p>{message}</p>
-		</div>
-		<!-- ?. syntax means call when children is passed -->
-		<form method="dialog">
-			{@render children?.()}
-		</form>
-	</dialog>
-</div>
+{#if isDialogOpen}
+	<div class="backdrop">
+		<dialog open={isDialogOpen} transition:scale={{ duration: 200 }}>
+			<div class="info">
+				<h3>{heading}</h3>
+				<p>{message}</p>
+			</div>
+			<form method="dialog">
+				{@render children()}
+			</form>
+		</dialog>
+	</div>
+{/if}
 
 <style>
 	.backdrop {
 		position: fixed;
-		top: 0;
-		left: 0;
 		width: 100%;
 		height: 100%;
 		background-color: rgba(0, 0, 0, 0.4);
@@ -58,11 +59,14 @@ It can be used to display a confirmation dialog, alert dialog, or any other type
 
 	dialog {
 		background: var(--color-surface);
-		color: var(--text);
 		border: none;
+		overflow-y: scroll;
+		scrollbar-width: none;
 		border-radius: 0.9rem;
+		max-height: 75vh;
+		min-width: 300px;
+		max-width: 75%;
 		padding: 20px;
-		/* box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); */
 	}
 
 	dialog p {
