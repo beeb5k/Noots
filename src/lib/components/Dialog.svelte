@@ -60,12 +60,9 @@
 	dialog {
 		background: var(--color-surface);
 		border: none;
-		overflow-y: scroll;
-		scrollbar-width: none;
 		border-radius: 0.9rem;
 		max-height: 75vh;
 		min-width: 300px;
-		max-width: 75%;
 		padding: 20px;
 	}
 

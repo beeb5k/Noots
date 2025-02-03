@@ -43,27 +43,24 @@
 		};
 	}
 
-	async function handleDialogSubmit(type: DialogMode) {
-		if (!vaultNameValue) {
+	function handleDialogSubmit(type: DialogMode) {
+		return async () => {
+			switch (type) {
+				case 'create':
+					await createNewVault(vaultNameValue);
+					break;
+				case 'edit':
+					await updateVaultName(modalControl.uid!, vaultNameValue); // modalControl.uid will never be undefined here. (Hopefully 🤞)
+					break;
+				case 'delete':
+					await deleteVault(modalControl.uid!, vaultNameValue); // here too.
+					break;
+			}
+
+			vaultNameValue = '';
 			isDialogOpen = false;
-			return;
-		}
-
-		switch (type) {
-			case 'create':
-				await createNewVault(vaultNameValue);
-				break;
-			case 'edit':
-				await updateVaultName(modalControl.uid!, vaultNameValue); // modalControl.uid will never be undefined here. (Hopefully 🤞)
-				break;
-			case 'delete':
-				await deleteVault(modalControl.uid!, vaultNameValue);
-				break;
-		}
-
-		vaultNameValue = '';
-		isDialogOpen = false;
-		await refreshVaults();
+			await refreshVaults();
+		};
 	}
 
 	function handleMoreClick(event: MouseEvent, vaultID: string) {
@@ -110,7 +107,7 @@
 {#if isDropdownOpen}
 	<Dropdown bind:position dropdownItems={DropdownData} bind:isDropdownOpen />
 {/if}
-<!-- Modal -->
+
 {#if modalControl.dialogCallerType === 'create'}
 	{@render DisplayDialog('Create Vault', 'Enter name you want to give to your vault')}
 {:else if modalControl.dialogCallerType === 'edit'}
@@ -136,7 +133,7 @@
 			<div id="card-container">
 				<!-- cards -->
 				{#each data as { vaultName, isFavorite, vaultID }}
-					<a href={`vault/${vaultID}`} id="vault-card">
+					<a href={`/${vaultID}`} id="vault-card">
 						<div id="vault-card-buttons">
 							<button
 								id="star-button"
@@ -182,7 +179,7 @@
 				disabled={modalControl.dialogCallerType === 'delete'
 					? vaultNameValue.toLowerCase() !== 'yes'
 					: !vaultNameValue}
-				onclick={() => handleDialogSubmit(modalControl.dialogCallerType)}
+				onclick={handleDialogSubmit(modalControl.dialogCallerType)}
 				type="submit">OK</Button>
 			<Button
 				onclick={() => {

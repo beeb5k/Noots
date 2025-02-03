@@ -34,7 +34,8 @@
 		border-radius: 0.9rem;
 		padding: 8px 10px;
 		background-color: #253025;
-		width: 100%;
+		width: inherit;
+		max-width: 300px;
 	}
 	.container:focus-within {
 		opacity: 0.9;

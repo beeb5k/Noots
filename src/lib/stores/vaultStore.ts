@@ -1,3 +1,4 @@
+import { FilesNdFolders } from '$lib/db/vaultItem';
 import { vaultsDB } from '$lib/db/vaultsDB';
 
 /**
@@ -27,6 +28,20 @@ export async function createNewVault(vaultName: string): Promise<void> {
 		vaultID: crypto.randomUUID(),
 		isFavorite: false
 	});
+
+	await FilesNdFolders.items.add({
+		name: vaultName,
+		id: crypto.randomUUID(),
+		type: 'folder',
+		children: [
+			{
+				id: crypto.randomUUID(),
+				name: 'rust',
+				type: 'file',
+				contentID: crypto.randomUUID()
+			}
+		]
+	});
 }
 
 /**
@@ -46,9 +61,8 @@ export async function updateVaultName(vaultID: string, vaultName: string): Promi
  * @param vaultID - The unique identifier of the vault to be deleted.
  * @returns A promise that resolves when the vault has been successfully deleted.
  */
-export async function deleteVault(vaultID: string, confirmationResponse : string): Promise<void> {
-	if (confirmationResponse.toLowerCase() === 'yes') 
-		await vaultsDB.Vaults.delete(vaultID);
+export async function deleteVault(vaultID: string, confirmationResponse: string): Promise<void> {
+	if (confirmationResponse.toLowerCase() === 'yes') await vaultsDB.Vaults.delete(vaultID);
 }
 
 /**
