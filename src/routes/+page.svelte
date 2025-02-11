@@ -36,6 +36,10 @@
 		uid: undefined
 	});
 
+	/**
+	 *Handles the opening of the dialog.
+	 *@param type - The type of dialog to open.
+	 */
 	function handleModalOpen(type: DialogMode) {
 		return () => {
 			modalControl.dialogCallerType = type;
@@ -43,6 +47,10 @@
 		};
 	}
 
+	/**
+	 * Handles the submission of the dialog.
+	 * @param type - The type of dialog to handle.
+	 */
 	function handleDialogSubmit(type: DialogMode) {
 		return async () => {
 			switch (type) {
@@ -63,6 +71,11 @@
 		};
 	}
 
+	/**
+	 * Handles the click event on the more button (three dots).
+	 * @param event - The click event.
+	 * @param vaultID - The id of the vault.
+	 */
 	function handleMoreClick(event: MouseEvent, vaultID: string) {
 		event.preventDefault();
 		event.stopPropagation();
@@ -72,10 +85,32 @@
 		position = `top: ${clientY}px; left: ${clientX}px;`;
 	}
 
+	/**
+	 * Refreshes the vaults.
+	 */
 	async function refreshVaults() {
-		data = await getAllVaults();
+		data = await sortVaults(getAllVaults);
 	}
 
+	/**
+	 * returns the vaults sorted by favorite and name.
+	 * @param func - The function to get the vaults.
+	 */
+	async function sortVaults(func: () => Promise<App.Vault[]>) {
+		const tempvar = await func();
+		return tempvar.sort((a, b) => {
+			if (a.isFavorite && !b.isFavorite) return -1;
+			if (!a.isFavorite && b.isFavorite) return 1;
+			return a.vaultName.localeCompare(b.vaultName);
+		});
+	}
+
+	/**
+	 * Handles the toggling of the favorite status of a vault.
+	 * @param event - The click event.
+	 * @param vaultID - The id of the vault.
+	 * @param isFavorite - The current favorite status of the vault.
+	 */
 	async function handleToggleFavorite(event: MouseEvent, vaultID: string, isFavorite: boolean) {
 		event.preventDefault();
 		await toggleVaultFavorite(vaultID, isFavorite);
