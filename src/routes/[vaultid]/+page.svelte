@@ -1,58 +1,20 @@
 <script lang="ts">
-	import Button from '$lib/components-ui/Button.svelte';
-	import Input from '$lib/components-ui/Input.svelte';
-	import Dialog from '$lib/components/Dialog.svelte';
+	import FileExplorer from '$lib/components/FileExplorer.svelte';
 	import Toolbar from '$lib/components/Toolbar.svelte';
 	import CreateIcon from '$lib/icons/CreateIcon.svelte';
+
 	import ProfileIcon from '$lib/icons/ProfileIcon.svelte';
 	import SettingsIcon from '$lib/icons/SettingsIcon.svelte';
 
 	const { data } = $props();
 	let isDialogOpen = $state(false);
-
-	interface vaultItem {
-		type: 'folder' | 'file';
-		name: string;
-		contentID?: string;
-		children?: vaultItem[];
-	}
-
-	const foo2: vaultItem[] = [
-		{
-			type: 'folder',
-			name: 'string',
-			contentID: 'string', // only if type is file
-			children: [
-				// only if type is folder
-				{
-					type: 'file',
-					name: 'string',
-					contentID: 'string'
-				}
-			]
-		}
-	];
 </script>
 
 <svelte:head>
 	<title>{'Noots | ' + data.vault?.vaultName}</title>
 </svelte:head>
 
-<Dialog bind:isDialogOpen heading="Explorer">
-	<div id="explorer">
-		<div class="item-container">
-			<p>Rust</p>
-			<p>Go</p>
-			<p>Zig</p>
-			<p>Rust</p>
-			<p>Go</p>
-			<p>Zig</p>
-			<p>Rust</p>
-
-			<Input />
-		</div>
-	</div>
-</Dialog>
+<FileExplorer {data} bind:isDialogOpen />
 
 <Toolbar>
 	<button onclick={() => (isDialogOpen = true)} aria-label="Create Vault">
@@ -75,20 +37,6 @@
 </div>
 
 <style>
-	#explorer {
-		max-height: 65vh;
-		border: solid 1px var(--border-color);
-		border-radius: 0.9rem;
-		padding: 10px;
-	}
-
-	.item-container {
-		min-width: fit-content;
-		max-height: inherit;
-		scrollbar-width: thin;
-		overflow-y: scroll;
-	}
-
 	#text-area {
 		padding: 10px;
 		min-height: 80vh;
@@ -119,10 +67,6 @@
 		margin-left: 15%;
 		margin-right: auto;
 		word-wrap: break-word;
-	}
-	p {
-		margin: 0;
-		padding: 4px;
 	}
 
 	main {

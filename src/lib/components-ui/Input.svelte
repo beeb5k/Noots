@@ -70,4 +70,8 @@
 	.icon:focus {
 		outline: none;
 	}
+
+	.container :global(button) {
+		margin: 0;
+	}
 </style>

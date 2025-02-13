@@ -7,6 +7,15 @@ declare global {
 			vaultID: string;
 			isFavorite: boolean;
 		}
+
+		interface vaultItem {
+			id: string;
+			type: 'folder' | 'file';
+			name: string;
+			contentID?: string;
+			parentID ?: string
+			children?: vaultItem[];
+		}
 	}
 }
 

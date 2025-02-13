@@ -1,20 +1,13 @@
 import Dexie, { type EntityTable } from 'dexie';
 
-interface vaultItem {
-	id: string;
-	type: 'folder' | 'file';
-	name: string;
-	contentID?: string;
-	children?: vaultItem[];
-}
+
 
 const FilesNdFolders = new Dexie('Files&Folders') as Dexie & {
-	items: EntityTable<vaultItem, 'id'>;
+	items: EntityTable<App.vaultItem, 'id'>;
 };
 
 FilesNdFolders.version(1).stores({
-	items: '&id,type,name,&contentID,children'
+	items: '&id,type,name,parentID,&contentID,children'
 });
 
-export type { vaultItem };
 export { FilesNdFolders };
