@@ -1,3 +1,7 @@
+<!-- 
+@component
+FileExplorer component is a reusable component that can be used to display a file explorer with folders and files.
+-->
 <script lang="ts">
 	import FilePlus from '$lib/icons/file-plus.svelte';
 	import FolderPlus from '$lib/icons/folder-plus.svelte';
@@ -6,10 +10,9 @@
 	import { FilesNdFolders } from '$lib/db/vaultItem.js';
 
 	let { isDialogOpen = $bindable(), data } = $props();
-    console.log(data);
-    
-	let selectedItems = $state<String>();
-	let expandedFolderIds = $state<Set<String>>(new Set());
+
+	let selectedItems = $state<string>();
+	let expandedFolderIds = $state<Set<string>>(new Set());
 
 	let itemsInVault = $state<App.vaultItem[]>();
 	// svelte-ignore non_reactive_update
@@ -26,7 +29,7 @@
 			if (isDialogOpen) {
 				itemsInVault = await FilesNdFolders.items
 					.where('parentID')
-					.equals(data.vault?.vaultID!)
+					.equals(data.vault.vaultID)
 					.toArray();
 			}
 		})();
@@ -55,7 +58,12 @@
 		}
 	}
 
-	function handleFileOrFolderCreation() {
+	/**
+	 * This function creates a file or folder in the current vault
+	 */
+	function createFileOrFolder() {
+		if (!inputElm.value) return;
+
 		return async () => {
 			await FilesNdFolders.items.add({
 				type: isCreate.type!,
@@ -119,11 +127,8 @@
 					{:else if isCreate.type === 'file'}
 						<FilePlus />
 					{/if}
-					<button
-						onclick={handleFileOrFolderCreation()}
-						aria-label="submit button"
-						type="submit"
-						hidden></button>
+					<button onclick={createFileOrFolder()} type="button" aria-label="submit button" hidden
+					></button>
 				</Input>
 			{/if}
 		</div>

@@ -1,3 +1,7 @@
+<!-- 
+@component
+Custom input component for consistent styling across the application.
+-->
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 	import type { HTMLInputAttributes } from 'svelte/elements';

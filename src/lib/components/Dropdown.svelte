@@ -1,3 +1,7 @@
+<!-- 
+@component
+Dropdown component is a reusable component that can be used to display a dropdown menu with clickable items.
+-->
 <script lang="ts">
 	import { onDestroy, onMount } from 'svelte';
 
@@ -25,9 +29,9 @@
 		}
 	}
 
-	/* 
+	/*
 		adding event listener to body (document) to close the dropdown
-		(i think so im not sure if document represents body)  
+		(i think so im not sure if document represents body)
 	*/
 	if (typeof document !== 'undefined') {
 		onMount(() => {

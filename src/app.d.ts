@@ -13,7 +13,7 @@ declare global {
 			type: 'folder' | 'file';
 			name: string;
 			contentID?: string;
-			parentID ?: string
+			parentID?: string;
 			children?: vaultItem[];
 		}
 	}

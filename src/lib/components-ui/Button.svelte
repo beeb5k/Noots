@@ -1,3 +1,7 @@
+<!-- 
+@component
+Custom button component for consistent styling across the application.
+-->
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 	import type { HTMLButtonAttributes } from 'svelte/elements';

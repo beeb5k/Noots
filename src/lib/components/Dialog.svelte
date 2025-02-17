@@ -1,3 +1,7 @@
+<!-- 
+@component
+Dialog component is a reusable component that can be used to display a dialog box with a heading, message, and content.
+-->
 <script lang="ts">
 	import { scale } from 'svelte/transition';
 	import type { Snippet } from 'svelte';
