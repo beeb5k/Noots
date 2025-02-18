@@ -12,10 +12,11 @@ declare global {
 			id: string;
 			type: 'folder' | 'file';
 			name: string;
-			contentID?: string;
 			parentID?: string;
+			contentID?: string;
 			children?: vaultItem[];
 		}
+		type nodeType = 'folder' | 'file';	
 	}
 }
 
