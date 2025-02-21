@@ -14,7 +14,9 @@
 	<title>{'Noots | ' + data.vault?.vaultName}</title>
 </svelte:head>
 
-<FileExplorer {data} bind:isDialogOpen />
+{#if data.vault && data.vaultId}
+	<FileExplorer data={{ vault: data.vault, vaultId: data.vaultId }} bind:isDialogOpen />
+{/if}
 
 <Toolbar>
 	<button onclick={() => (isDialogOpen = true)} aria-label="Create Vault">

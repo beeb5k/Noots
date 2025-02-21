@@ -10,13 +10,20 @@ declare global {
 
 		interface vaultItem {
 			id: string;
-			type: 'folder' | 'file';
+			type: App.nodeType;
 			name: string;
-			parentID?: string;
-			contentID?: string;
-			children?: vaultItem[];
+			parentID: string;
 		}
-		type nodeType = 'folder' | 'file';	
+
+		interface vaultFiles extends vaultItem {
+			contentID: string;
+		}
+
+		interface vaultFolder extends vaultItem {
+			children: string[];
+		}
+
+		type nodeType = 'folder' | 'file';
 	}
 }
 

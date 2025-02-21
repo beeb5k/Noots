@@ -3,45 +3,40 @@
 FileExplorer component is a reusable component that can be used to display a file explorer with folders and files.
 -->
 <script lang="ts">
+	import type { FEtypes } from './component';
 	import FilePlus from '$lib/icons/file-plus.svelte';
-	import FolderPlus from '$lib/icons/folder-plus.svelte';
-	import Input from '$lib/components-ui/Input.svelte';
 	import Dialog from '$lib/components/Dialog.svelte';
+	import Input from '$lib/components-ui/Input.svelte';
 	import { FilesNdFolders } from '$lib/db/vaultItem.js';
+	import FolderPlus from '$lib/icons/folder-plus.svelte';
 
-	interface SelectedItems {
-		id: string;
-		type: App.nodeType;
-		parentID?: string;
-	}
-
-	let { isDialogOpen = $bindable(), data } = $props();
-
-	let selectedItems = $state<SelectedItems>();
-	let expandedFolderIds = $state<Set<string>>(new Set());
-
-	let itemsInVault = $state<App.vaultItem[]>();
 	// svelte-ignore non_reactive_update
 	let inputElm: HTMLInputElement;
-	let isCreate: { type: undefined | App.nodeType; isEnabled: boolean } = $state({
-		type: undefined,
-		isEnabled: false
-	});
+	let isCreate = $state<FEtypes.IisCreate>();
+	let selectedItems = $state<FEtypes.ISelectedItems>();
+	let expandedFolderIds = $state<Set<string>>(new Set());
+	let itemsInVault = $state<FEtypes.vaultContentStructure>();
+	let { isDialogOpen = $bindable(), data }: FEtypes.IProps = $props();
 
 	$effect(() => {
-		if (isDialogOpen && isCreate.isEnabled) inputElm.focus();
+		if (isCreate && isDialogOpen && isCreate.isEnabled) inputElm.focus();
 
 		(async () => {
 			if (isDialogOpen) {
-				itemsInVault = await FilesNdFolders.items
+				const folders = await FilesNdFolders.folders
 					.where('parentID')
-					.equals(data.vault.vaultID)
+					.equals(data.vaultId)
 					.toArray();
+				const files = await FilesNdFolders.files.where('parentID').equals(data.vaultId).toArray();
+				itemsInVault = { folders, files };
+				console.log(itemsInVault);
 			}
 		})();
 	});
 
 	function toggleInput(type: App.nodeType) {
+		if (!isCreate) return;
+
 		isCreate = {
 			isEnabled: type === isCreate.type ? !isCreate.isEnabled : true,
 			type
@@ -49,55 +44,19 @@ FileExplorer component is a reusable component that can be used to display a fil
 	}
 
 	/**
-	 * This function finds the selected item in the file explorer
-	 * time complexity: O(n)
-	 * @param id - id of the selected item
-	 * @param data - data to search for the parent folder id
-	 * @returns parent folder id
-	 */
-	function findSeletedItem(id: string, data: App.vaultItem[]): App.vaultItem | undefined {
-		let selectedItem: App.vaultItem | undefined;
-		for (let i = 0; i < data.length; i++) {
-			if (data[i].id === id) {
-				selectedItem = data[i];
-				break;
-			}
-
-			if (data[i].children) {
-				const found = data[i].children!.find((item) => item.id === id);
-				if (found) {
-					selectedItem = found;
-					break;
-				} else {
-					selectedItem = findSeletedItem(id, data[i].children!);
-				}
-			}
-		}
-
-		return selectedItem;
-	}
-
-	/**
 	 * This function handles the selected items in the file explorer
 	 * @param id - id of the selected item
 	 */
-	function handleSeletedItems(id: string) {
-		if (itemsInVault)
-			selectedItems = {
-				id,
-				type: findSeletedItem(id, itemsInVault)?.type!,
-				parentID: findSeletedItem(id, itemsInVault)?.parentID
-			};
-
+	function handleSelectedItems(id: string) {
 		const isExpanded = expandedFolderIds.has(id);
 
 		if (isExpanded) {
 			expandedFolderIds.delete(id);
-			// Force reactivity update
+			// Force reactivity update because Set doesn't trigger reactivity.
 			expandedFolderIds = new Set(expandedFolderIds);
 		} else {
 			expandedFolderIds.add(id);
-			// Force reactivity update
+			// Force reactivity update because Set doesn't trigger reactivity.
 			expandedFolderIds = new Set(expandedFolderIds);
 		}
 	}
@@ -109,14 +68,25 @@ FileExplorer component is a reusable component that can be used to display a fil
 		if (!inputElm.value) return;
 
 		return async () => {
-			await FilesNdFolders.items.add({
-				type: isCreate.type!,
-				name: inputElm.value,
-				parentID: data.vault?.vaultID,
-				id: crypto.randomUUID()
-			});
+			if (!isCreate) return;
 
-			isDialogOpen = false;
+			if (!selectedItems?.id) {
+				await FilesNdFolders.files.add({
+					name: inputElm.value,
+					type: isCreate.type,
+					parentID: data.vault.vaultID,
+					contentID: '',
+					id: crypto.randomUUID()
+				});
+
+				inputElm.value = '';
+				selectedItems = undefined;
+				isCreate = {
+					type: 'file',
+					isEnabled: false
+				};
+				isDialogOpen = false;
+			}
 		};
 	}
 </script>
@@ -137,16 +107,18 @@ FileExplorer component is a reusable component that can be used to display a fil
 				</div>
 			</div>
 
-			{#if isCreate.isEnabled && !selectedItems}
-				<Input bind:thiss={inputElm} aria-label="Vault Name Input" placeholder="Enter name">
-					{#if isCreate.type === 'folder'}
-						<FolderPlus />
-					{:else if isCreate.type === 'file'}
-						<FilePlus />
-					{/if}
-					<button onclick={createFileOrFolder()} type="submit" aria-label="submit button" hidden
-					></button>
-				</Input>
+			{#if isCreate}
+				{#if isCreate.isEnabled && !selectedItems}
+					<Input bind:thiss={inputElm} aria-label="Vault Name Input" placeholder="Enter name">
+						{#if isCreate.type === 'folder'}
+							<FolderPlus />
+						{:else if isCreate.type === 'file'}
+							<FilePlus />
+						{/if}
+						<button onclick={createFileOrFolder()} type="submit" aria-label="submit button" hidden
+						></button>
+					</Input>
+				{/if}
 			{/if}
 
 			{#if itemsInVault}
@@ -156,42 +128,51 @@ FileExplorer component is a reusable component that can be used to display a fil
 	</div>
 </Dialog>
 
-{#snippet RenderItems(vaultItems: App.vaultItem[], level = 0)}
+{#snippet RenderItems(vaultItems: FEtypes.vaultContentStructure, level = 0)}
 	{#if vaultItems}
-		{#each vaultItems as item}
+		{#each vaultItems.folders as folder}
 			<!-- svelte-ignore a11y_click_events_have_key_events -->
 			<!-- svelte-ignore a11y_no_static_element_interactions -->
 			<div
-				onclick={() => handleSeletedItems(item.id)}
+				onclick={() => handleSelectedItems(folder.id)}
 				class="items"
-				style={`${selectedItems?.id === item.id ? 'background-color: var(--color-surface-hov);' : ''} padding-left: ${
+				style={`${selectedItems?.id === folder.id ? 'background-color: var(--color-surface-hov);' : ''} padding-left: ${
 					level * 10
 				}px;`}>
 				<h6>
-					{item.type === 'folder' && expandedFolderIds.has(item.id)
-						? '📂'
-						: item.type === 'file'
-							? '📄'
-							: '🖿'}
-
-					{item.name}
+					{expandedFolderIds.has(folder.id) ? '📂' : '🖿'}
+					{folder.name}
 				</h6>
 			</div>
-			{#if isCreate.isEnabled && selectedItems?.id === item.id}
-				<Input bind:thiss={inputElm} aria-label="Vault Name Input" placeholder="Enter name">
-					{#if isCreate.type === 'folder'}
+			{#if isCreate}
+				{#if isCreate.isEnabled && selectedItems?.id === folder.id}
+					<Input bind:thiss={inputElm} aria-label="Vault Name Input" placeholder="Enter name">
 						<FolderPlus />
-					{:else if isCreate.type === 'file'}
-						<FilePlus />
-					{/if}
-					<button onclick={createFileOrFolder()} type="submit" aria-label="submit button" hidden
-					></button>
-				</Input>
+						<button onclick={createFileOrFolder()} type="submit" aria-label="submit button" hidden
+						></button>
+					</Input>
+				{/if}
 			{/if}
 
-			{#if item.type === 'folder' && expandedFolderIds.has(item.id) && item.children && item.children.length > 0}
-				{@render RenderItems(item.children, level + 1)}
+			{#if expandedFolderIds.has(folder.id) && 'children' in folder && folder.children.length > 0}
+				{@render RenderItems({ folders: folder.children, files: [] }, level + 1)}
 			{/if}
+		{/each}
+
+		{#each vaultItems.files as file}
+			<!-- svelte-ignore a11y_click_events_have_key_events -->
+			<!-- svelte-ignore a11y_no_static_element_interactions -->
+			<div
+				onclick={() => handleSelectedItems(file.id)}
+				class="items"
+				style={`${selectedItems?.id === file.id ? 'background-color: var(--color-surface-hov);' : ''} padding-left: ${
+					level * 10
+				}px;`}>
+				<h6>
+					📄
+					{file.name}
+				</h6>
+			</div>
 		{/each}
 	{/if}
 {/snippet}
