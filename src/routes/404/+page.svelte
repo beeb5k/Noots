@@ -8,7 +8,6 @@
 	function play(uChoice: Choices) {
 		return () => {
 			const getCompChoice = Math.floor(Math.random() * 2);
-			console.log(getCompChoice);
 		};
 	}
 </script>

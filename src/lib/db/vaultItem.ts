@@ -6,8 +6,8 @@ const FilesNdFolders = new Dexie('Files&Folders') as Dexie & {
 };
 
 FilesNdFolders.version(1).stores({
-	files: '&id,type,name,parentID,&contentID',
-	folders: '&id,type,name,parentID,&children'
+	files: '&id,type,name,parentID,contentID',
+	folders: '&id,type,name,parentID,children'
 });
 
 export { FilesNdFolders };

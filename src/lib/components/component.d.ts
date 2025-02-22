@@ -16,8 +16,8 @@ namespace FEtypes {
 	}
 
 	interface IisCreate {
-		type: App.nodeType;
-		isEnabled: boolean;
+		type: App.nodeType = "folder";
+		isEnabled: boolean = false;
 	}
 }
 

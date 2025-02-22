@@ -1,4 +1,3 @@
-import { FilesNdFolders } from '$lib/db/vaultItem';
 import { vaultsDB } from '$lib/db/vaultsDB';
 
 /**
@@ -27,20 +26,6 @@ export async function createNewVault(vaultName: string): Promise<void> {
 		vaultName,
 		vaultID: crypto.randomUUID(),
 		isFavorite: false
-	});
-
-	await FilesNdFolders.items.add({
-		name: vaultName,
-		id: crypto.randomUUID(),
-		type: 'folder',
-		children: [
-			{
-				id: crypto.randomUUID(),
-				name: 'rust',
-				type: 'file',
-				contentID: crypto.randomUUID()
-			}
-		]
 	});
 }
 
